@@ -1,7 +1,7 @@
 # TecnoStore KDS Projesi (Karar Destek Sistemi)
 
 **Ders:** Sunucu Tabanlı Programlama  
-**Teslim Eden:** Baha Arslan  
+**Teslim Eden:** Muhammed Baha Arslan  - 2023469137
 **Konu:** MVC Mimarisi ile RESTful API ve Karar Destek Sistemi Tasarımı
 
 ## 1. Projenin Amacı
