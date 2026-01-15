@@ -68,9 +68,8 @@ Sistem sadece genel bir tahmin yapmakla kalmaz, aynı zamanda **Şehir (Coğrafi
         ```
 6.  **Projeyi Çalıştırma:**
     ```bash
-    npm start
-    # veya geliştirme modunda
-    npm run dev
+    # Projeyi başlat
+    node app.js
     ```
 7.  **Tarayıcı:** `http://localhost:3000` adresine gidin.
 
