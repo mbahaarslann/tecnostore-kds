@@ -1,0 +1,50 @@
+<% var tarihDegeri=sim.olusturma_tarihi ? new Date(sim.olusturma_tarihi).toLocaleDateString('tr-TR', { day: 'numeric' ,
+    month: 'long' , year: 'numeric' , hour: '2-digit' , minute:'2-digit' })
+    : '<span class="text-danger">Tarih Yok</span>' ; var tipBadge='' ; var tip=(sim.senaryo_tipi || ''
+    ).toString().trim(); if (tip==='Normal' ) tipBadge='<span class="badge bg-primary badge-type">Normal</span>' ; else
+    if (['Kotumser', 'Kötümser' , 'kotumser' ].includes(tip))
+    tipBadge='<span class="badge bg-danger badge-type">Kötümser</span>' ; else if (['Iyimser', 'İyimser' , 'Iyımser'
+    , 'lyimser' ].includes(tip)) tipBadge='<span class="badge bg-success badge-type">İyimser</span>' ; else
+    tipBadge=`<span class="badge bg-secondary badge-type">${tip || 'Belirtilmemiş'}</span>`;
+
+    var tooltipContent = `
+    <div class='text-start small'>
+        <strong><i class='fa-regular fa-calendar me-1'></i> Süre:</strong> ${sim.sure} Ay<br>
+        <strong><i class='fa-solid fa-dollar-sign me-1'></i> Dolar:</strong>
+        ${Number(sim.girilen_dolar_kuru).toFixed(2)} ₺<br>
+        <strong><i class='fa-solid fa-arrow-trend-up me-1'></i> Enflasyon:</strong> %${sim.enflasyon_orani || 0}<br>
+        <strong><i class='fa-solid fa-tag me-1'></i> Zam/İndirim:</strong> %${sim.zam_orani || 0}<br>
+        <hr class='my-1'>
+        <strong><i class='fa-solid fa-map-pin me-1'></i></strong> ${sim.kapsam_sehir || 'Genel'}<br>
+        <strong><i class='fa-solid fa-copyright me-1'></i></strong> ${sim.kapsam_marka || 'Genel'}<br>
+        <strong><i class='fa-solid fa-layer-group me-1'></i></strong> ${sim.kapsam_kategori || 'Genel'}
+    </div>
+    `.replace(/\n/g, '').trim();
+    %>
+    <tr>
+        <td class="ps-4 fw-bold text-muted">#<%= sim.id %>
+        </td>
+        <td>
+            <div class="fw-bold text-dark">
+                <%= sim.simulasyon_adi %>
+            </div>
+        </td>
+        <td><i class="fa-regular fa-clock me-2 text-muted"></i><%- tarihDegeri %></td>
+        <td><%- tipBadge %></td>
+        <td class="text-end pe-4">
+            <button type="button" class="btn btn-sm btn-outline-info rounded-circle me-2" data-bs-toggle="tooltip"
+                data-bs-html="true" data-bs-placement="left" title="<%= tooltipContent %>">
+                <i class="fa-solid fa-info"></i>
+            </button>
+            <a href="/?simId=<%= sim.id %>" class="btn btn-sm btn-outline-primary">
+                <i class="fa-solid fa-eye me-1"></i> İncele
+            </a>
+            <a href="/simulasyon/duzenle/<%= sim.id %>" class="btn btn-sm btn-outline-warning ms-1">
+                <i class="fa-solid fa-pen-to-square"></i>
+            </a>
+            <button class="btn btn-sm btn-outline-danger ms-1"
+                onclick="deleteSimulation(<%= sim.id %>, '<%= sim.simulasyon_adi.replace(/'/g, " \\'") %>')">
+                <i class="fa-solid fa-trash"></i> Sil
+            </button>
+        </td>
+    </tr>

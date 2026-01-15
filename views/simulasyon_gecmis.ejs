@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Geçmiş Simülasyonlar | TecnoStore KDS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #f4f6f9;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        /* SIDEBAR (Standart) */
+        .sidebar {
+            height: 100vh;
+            width: 250px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: #212529;
+            padding-top: 20px;
+            color: white;
+            z-index: 1000;
+        }
+
+        .sidebar a {
+            padding: 15px 25px;
+            text-decoration: none;
+            font-size: 15px;
+            color: #adb5bd;
+            display: block;
+            border-left: 3px solid transparent;
+            transition: 0.2s;
+        }
+
+        .sidebar a:hover,
+        .sidebar a.active {
+            background-color: #343a40;
+            color: #fff;
+            border-left-color: #0d6efd;
+        }
+
+        .sidebar .brand {
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 40px;
+            color: #fff;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-heading {
+            padding: 10px 25px;
+            font-size: 12px;
+            text-transform: uppercase;
+            color: #6c757d;
+            font-weight: bold;
+        }
+
+        .main-content {
+            margin-left: 250px;
+            padding: 30px;
+        }
+
+        .table-card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            background: white;
+            overflow: hidden;
+            margin-bottom: 25px;
+        }
+
+        .table thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .table thead th {
+            border: none;
+            padding: 15px;
+            font-weight: 600;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .table tbody tr {
+            transition: all 0.2s;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .table tbody tr:hover {
+            background-color: #f8f9fa;
+            transform: translateX(3px);
+        }
+
+        .badge-type {
+            font-size: 0.85em;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .category-section {
+            margin-bottom: 35px;
+        }
+
+        .category-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 12px 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            border-left: 4px solid;
+        }
+
+        .category-header.iyimser {
+            border-left-color: #1cc88a;
+        }
+
+        .category-header.normal {
+            border-left-color: #4e73df;
+        }
+
+        .category-header.kotumser {
+            border-left-color: #e74c3c;
+        }
+
+        .category-header.diger {
+            border-left-color: #858796;
+        }
+
+        .category-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .category-count {
+            margin-left: auto;
+            background: #f8f9fa;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .filter-tab {
+            padding: 10px 20px;
+            border-radius: 25px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .filter-tab:hover {
+            border-color: #4e73df;
+            color: #4e73df;
+        }
+
+        .filter-tab.active {
+            background: linear-gradient(135deg, #4e73df, #224abe);
+            color: white;
+            border-color: #4e73df;
+        }
+
+        .empty-category {
+            text-align: center;
+            padding: 40px;
+            color: #adb5bd;
+        }
+
+        .empty-category i {
+            font-size: 48px;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        /* Tooltip Custom Style */
+        .tooltip-inner {
+            text-align: left !important;
+            max-width: 300px !important;
+            padding: 10px !important;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="sidebar">
+        <div class="brand"><i class="fa-solid fa-layer-group me-2"></i> TecnoStore <span
+                style="color:#0d6efd">KDS</span></div>
+        <div class="sidebar-heading">Analiz & Rapor</div>
+        <a href="/"><i class="fa-solid fa-chart-pie me-2"></i> Kokpit (Dashboard)</a>
+        <a href="/cografi-analiz"><i class="fa-solid fa-map-location-dot me-2"></i> Coğrafi Analiz</a>
+        <div class="sidebar-heading mt-3">Gelecek Planlama</div>
+        <a href="/simulasyon/yeni"><i class="fa-solid fa-wand-magic-sparkles me-2"></i> Yeni Simülasyon</a>
+        <a href="/simulasyon/gecmis" class="active"><i class="fa-solid fa-clock-rotate-left me-2"></i> Geçmiş
+            Simülasyonlar</a>
+    </div>
+
+    <div class="main-content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h3 class="fw-bold text-secondary mb-1">📂 Simülasyon Arşivi</h3>
+                <small class="text-muted">Tüm simülasyonlarınız kategorize edilmiş şekilde listelenmiştir</small>
+            </div>
+            <a href="/simulasyon/yeni" class="btn btn-primary btn-lg">
+                <i class="fa-solid fa-plus me-2"></i> Yeni Oluştur
+            </a>
+        </div>
+
+        <div class="filter-tabs">
+            <div class="filter-tab active" onclick="showFilter('all')">
+                <i class="fa-solid fa-list me-2"></i>Tümü (<%= simulasyonlar ? simulasyonlar.length : 0 %>)
+            </div>
+            <div class="filter-tab" onclick="showFilter('tip')">
+                <i class="fa-solid fa-tags me-2"></i>Senaryo Tipine Göre
+            </div>
+            <div class="filter-tab" onclick="showFilter('tarih')">
+                <i class="fa-solid fa-calendar me-2"></i>Tarihe Göre
+            </div>
+        </div>
+
+        <div id="tipView" style="display: none;">
+            <% if (kategorizeEdilmis.iyimser.length> 0) { %>
+                <div class="category-section">
+                    <div class="category-header iyimser">
+                        <i class="fa-solid fa-sun me-2 text-success"></i>
+                        <h5 class="category-title text-success mb-0">İyimser Senaryolar</h5>
+                        <span class="category-count">
+                            <%= kategorizeEdilmis.iyimser.length %> adet
+                        </span>
+                    </div>
+                    <div class="table-card">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead>
+                                    <tr>
+                                        <th class="ps-4">#ID</th>
+                                        <th>Senaryo Adı</th>
+                                        <th>Oluşturma Tarihi</th>
+                                        <th>Tip</th>
+                                        <th class="text-end pe-4">İşlemler</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% kategorizeEdilmis.iyimser.forEach(sim=> { %>
+                                        <%- include('_sim_row', {sim: sim}) %>
+                                            <% }); %>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <% } %>
+
+                    <% if (kategorizeEdilmis.normal.length> 0) { %>
+                        <div class="category-section">
+                            <div class="category-header normal">
+                                <i class="fa-solid fa-scale-balanced me-2 text-primary"></i>
+                                <h5 class="category-title text-primary mb-0">Normal Senaryolar</h5>
+                                <span class="category-count">
+                                    <%= kategorizeEdilmis.normal.length %> adet
+                                </span>
+                            </div>
+                            <div class="table-card">
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th class="ps-4">#ID</th>
+                                                <th>Senaryo Adı</th>
+                                                <th>Oluşturma Tarihi</th>
+                                                <th>Tip</th>
+                                                <th class="text-end pe-4">İşlemler</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <% kategorizeEdilmis.normal.forEach(sim=> { %>
+                                                <%- include('_sim_row', {sim: sim}) %>
+                                                    <% }); %>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <% } %>
+
+                            <% if (kategorizeEdilmis.kotumser.length> 0) { %>
+                                <div class="category-section">
+                                    <div class="category-header kotumser">
+                                        <i class="fa-solid fa-cloud-rain me-2 text-danger"></i>
+                                        <h5 class="category-title text-danger mb-0">Kötümser Senaryolar</h5>
+                                        <span class="category-count">
+                                            <%= kategorizeEdilmis.kotumser.length %> adet
+                                        </span>
+                                    </div>
+                                    <div class="table-card">
+                                        <div class="table-responsive">
+                                            <table class="table table-hover align-middle mb-0">
+                                                <thead>
+                                                    <tr>
+                                                        <th class="ps-4">#ID</th>
+                                                        <th>Senaryo Adı</th>
+                                                        <th>Oluşturma Tarihi</th>
+                                                        <th>Tip</th>
+                                                        <th class="text-end pe-4">İşlemler</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <% kategorizeEdilmis.kotumser.forEach(sim=> { %>
+                                                        <%- include('_sim_row', {sim: sim}) %>
+                                                            <% }); %>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                                <% } %>
+
+                                    <% if (kategorizeEdilmis.diger.length> 0) { %>
+                                        <div class="category-section">
+                                            <div class="category-header diger">
+                                                <i class="fa-solid fa-question-circle me-2 text-secondary"></i>
+                                                <h5 class="category-title text-secondary mb-0">Diğer Senaryolar</h5>
+                                                <span class="category-count">
+                                                    <%= kategorizeEdilmis.diger.length %> adet
+                                                </span>
+                                            </div>
+                                            <div class="table-card">
+                                                <div class="table-responsive">
+                                                    <table class="table table-hover align-middle mb-0">
+                                                        <thead>
+                                                            <tr>
+                                                                <th class="ps-4">#ID</th>
+                                                                <th>Senaryo Adı</th>
+                                                                <th>Oluşturma Tarihi</th>
+                                                                <th>Tip</th>
+                                                                <th class="text-end pe-4">İşlemler</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <% kategorizeEdilmis.diger.forEach(sim=> { %>
+                                                                <%- include('_sim_row', {sim: sim}) %>
+                                                                    <% }); %>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <% } %>
+
+                                            <% if (kategorizeEdilmis.iyimser.length===0 &&
+                                                kategorizeEdilmis.normal.length===0 &&
+                                                kategorizeEdilmis.kotumser.length===0 &&
+                                                kategorizeEdilmis.diger.length===0) { %>
+                                                <div class="empty-category">
+                                                    <i class="fa-solid fa-filter-circle-xmark"></i>
+                                                    <p>Filtreye uygun kayıt bulunamadı.</p>
+                                                </div>
+                                                <% } %>
+        </div>
+
+        <div id="tarihView" style="display: none;">
+            <% if (tarihGruplari.bugun.length> 0) { %>
+                <div class="category-section">
+                    <div class="category-header" style="border-left-color: #1cc88a;">
+                        <i class="fa-solid fa-calendar-day me-2 text-success"></i>
+                        <h5 class="category-title text-success mb-0">Bugün Oluşturulanlar</h5>
+                        <span class="category-count">
+                            <%= tarihGruplari.bugun.length %> adet
+                        </span>
+                    </div>
+                    <div class="table-card">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead>
+                                    <tr>
+                                        <th class="ps-4">#ID</th>
+                                        <th>Senaryo Adı</th>
+                                        <th>Oluşturma Tarihi</th>
+                                        <th>Tip</th>
+                                        <th class="text-end pe-4">İşlemler</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% tarihGruplari.bugun.forEach(sim=> { %>
+                                        <%- include('_sim_row', {sim: sim}) %>
+                                            <% }); %>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <% } %>
+
+                    <% if (tarihGruplari.buHafta.length> 0) { %>
+                        <div class="category-section">
+                            <div class="category-header" style="border-left-color: #4e73df;">
+                                <i class="fa-solid fa-calendar-week me-2 text-primary"></i>
+                                <h5 class="category-title text-primary mb-0">Bu Hafta Oluşturulanlar</h5>
+                                <span class="category-count">
+                                    <%= tarihGruplari.buHafta.length %> adet
+                                </span>
+                            </div>
+                            <div class="table-card">
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th class="ps-4">#ID</th>
+                                                <th>Senaryo Adı</th>
+                                                <th>Oluşturma Tarihi</th>
+                                                <th>Tip</th>
+                                                <th class="text-end pe-4">İşlemler</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <% tarihGruplari.buHafta.forEach(sim=> { %>
+                                                <%- include('_sim_row', {sim: sim}) %>
+                                                    <% }); %>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <% } %>
+
+                            <% if (tarihGruplari.buAy.length> 0) { %>
+                                <div class="category-section">
+                                    <div class="category-header" style="border-left-color: #f6c23e;">
+                                        <i class="fa-solid fa-calendar-alt me-2 text-warning"></i>
+                                        <h5 class="category-title text-warning mb-0">Bu Ay Oluşturulanlar</h5>
+                                        <span class="category-count">
+                                            <%= tarihGruplari.buAy.length %> adet
+                                        </span>
+                                    </div>
+                                    <div class="table-card">
+                                        <div class="table-responsive">
+                                            <table class="table table-hover align-middle mb-0">
+                                                <thead>
+                                                    <tr>
+                                                        <th class="ps-4">#ID</th>
+                                                        <th>Senaryo Adı</th>
+                                                        <th>Oluşturma Tarihi</th>
+                                                        <th>Tip</th>
+                                                        <th class="text-end pe-4">İşlemler</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <% tarihGruplari.buAy.forEach(sim=> { %>
+                                                        <%- include('_sim_row', {sim: sim}) %>
+                                                            <% }); %>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                                <% } %>
+
+                                    <% if (tarihGruplari.eski.length> 0) { %>
+                                        <div class="category-section">
+                                            <div class="category-header" style="border-left-color: #858796;">
+                                                <i class="fa-solid fa-archive me-2 text-secondary"></i>
+                                                <h5 class="category-title text-secondary mb-0">Eski Kayıtlar</h5>
+                                                <span class="category-count">
+                                                    <%= tarihGruplari.eski.length %> adet
+                                                </span>
+                                            </div>
+                                            <div class="table-card">
+                                                <div class="table-responsive">
+                                                    <table class="table table-hover align-middle mb-0">
+                                                        <thead>
+                                                            <tr>
+                                                                <th class="ps-4">#ID</th>
+                                                                <th>Senaryo Adı</th>
+                                                                <th>Oluşturma Tarihi</th>
+                                                                <th>Tip</th>
+                                                                <th class="text-end pe-4">İşlemler</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <% tarihGruplari.eski.forEach(sim=> { %>
+                                                                <%- include('_sim_row', {sim: sim}) %>
+                                                                    <% }); %>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <% } %>
+
+                                            <% if (tarihGruplari.bugun.length===0 && tarihGruplari.buHafta.length===0 &&
+                                                tarihGruplari.buAy.length===0 && tarihGruplari.eski.length===0) { %>
+                                                <div class="empty-category">
+                                                    <i class="fa-solid fa-calendar-xmark"></i>
+                                                    <p>Filtreye uygun kayıt bulunamadı.</p>
+                                                </div>
+                                                <% } %>
+        </div>
+
+        <div id="allView">
+            <div class="table-card">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th class="ps-4">#ID</th>
+                                <th>Senaryo Adı</th>
+                                <th>Oluşturma Tarihi</th>
+                                <th>Tip</th>
+                                <th class="text-end pe-4">İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if (simulasyonlar && simulasyonlar.length> 0) { %>
+                                <% simulasyonlar.forEach(sim=> { %>
+                                    <%- include('_sim_row', {sim: sim}) %>
+                                        <% }); %>
+                                            <% } else { %>
+                                                <tr>
+                                                    <td colspan="5" class="text-center py-4 text-muted"><i
+                                                            class="fa-solid fa-folder-open fs-2 mb-2 d-block"></i>Kayıt
+                                                        bulunamadı</td>
+                                                </tr>
+                                                <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Bootstrap Tooltip'leri etkinleştir
+        document.addEventListener("DOMContentLoaded", function () {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
+
+        function showFilter(type) {
+            document.getElementById('allView').style.display = 'none';
+            document.getElementById('tipView').style.display = 'none';
+            document.getElementById('tarihView').style.display = 'none';
+
+            document.querySelectorAll('.filter-tab').forEach(tab => tab.classList.remove('active'));
+
+            if (type === 'all') {
+                document.getElementById('allView').style.display = 'block';
+                event.currentTarget.classList.add('active');
+            } else if (type === 'tip') {
+                document.getElementById('tipView').style.display = 'block';
+                event.currentTarget.classList.add('active');
+            } else if (type === 'tarih') {
+                document.getElementById('tarihView').style.display = 'block';
+                event.currentTarget.classList.add('active');
+            }
+        }
+
+        async function deleteSimulation(simId, simName) {
+            if (!confirm(`"${simName}" adlı simülasyonu silmek istediğinizden emin misiniz?\n\nBu işlem geri alınamaz!`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/simulasyon/sil/${simId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert('✅ Simülasyon başarıyla silindi!');
+                    window.location.reload();
+                } else {
+                    alert('❌ Hata: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Hata:', error);
+                alert('❌ Bir hata oluştu. Lütfen tekrar deneyin.');
+            }
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Coğrafi Analiz (CBS) | TecnoStore KDS</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <style>
+        body { 
+            background: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            overflow: hidden; 
+        }
+        
+        /* SIDEBAR */
+        .sidebar { 
+            height: 100vh;
+            width: 260px; 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            background: linear-gradient(180deg, #1a1d29 0%, #2d3142 100%); 
+            padding-top: 25px; 
+            color: white; 
+            z-index: 2000;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.1);
+        }
+        .sidebar a { 
+            padding: 16px 25px;
+            text-decoration: none; 
+            font-size: 15px; 
+            color: #b8bcc8; 
+            display: block; 
+            border-left: 3px solid transparent; 
+            transition: all 0.3s ease; 
+            margin: 2px 10px;
+            border-radius: 8px;
+        }
+        .sidebar a:hover { 
+            background: rgba(255,255,255,0.1);
+            color: #fff; 
+            transform: translateX(5px);
+        }
+        .sidebar a.active { 
+            background: linear-gradient(135deg, #4e73df, #224abe);
+            color: #fff; 
+            border-left-color: #fff;
+            box-shadow: 0 4px 15px rgba(78, 115, 223, 0.3);
+        }
+        .sidebar .brand { 
+            font-size: 22px;
+            font-weight: 700; 
+            text-align: center; 
+            margin-bottom: 40px; 
+            color: #fff; 
+            letter-spacing: 1.5px; 
+            padding: 0 20px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        
+        /* MAP AREA */
+        .map-wrapper { 
+            margin-left: 260px;
+            height: 100vh; 
+            width: calc(100% - 260px); 
+            position: relative; 
+        }
+        #map { 
+            height: 100%;
+            width: 100%; 
+            background: #ffffff; 
+            z-index: 1;
+        } 
+
+        /* CONTROL PANEL (RIGHT) */
+        .control-panel { 
+            position: absolute;
+            top: 20px; 
+            right: 20px; 
+            background: rgba(255, 255, 255, 0.95); 
+            padding: 20px; 
+            border-radius: 16px; 
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15); 
+            z-index: 1000; 
+            width: 320px; 
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0,0,0,0.05);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .control-panel h6 {
+            font-weight: 800;
+            color: #343a40;
+            margin-bottom: 12px;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .metric-btn { 
+            width: 100%;
+            margin-bottom: 6px; 
+            text-align: left; 
+            font-weight: 600; 
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+            transition: all 0.2s;
+            font-size: 13px;
+            background: white;
+            color: #495057;
+        }
+        .metric-btn:hover {
+            background: #f8f9fa;
+            transform: translateX(3px);
+        }
+        .metric-btn.active { 
+            background: linear-gradient(135deg, #4e73df, #224abe); 
+            color: white; 
+            border-color: transparent;
+            box-shadow: 0 4px 12px rgba(78, 115, 223, 0.3);
+        }
+
+        /* RANKING LIST */
+        .ranking-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .ranking-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 12px;
+        }
+        .ranking-item:last-child { border-bottom: none; }
+        
+        .rank-num {
+            background: #e9ecef;
+            color: #495057;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 18px;
+            font-size: 10px;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+        .ranking-list.top .ranking-item:nth-child(1) .rank-num { background: #ffd700; color: #fff; }
+        .ranking-list.top .ranking-item:nth-child(2) .rank-num { background: #c0c0c0; color: #fff; }
+        .ranking-list.top .ranking-item:nth-child(3) .rank-num { background: #cd7f32; color: #fff; }
+        .ranking-list.bottom .rank-num { background: #ffebee; color: #c62828; }
+
+        /* SUMMARY CARD */
+        .summary-card {
+            position: absolute;
+            top: 20px; 
+            left: 50%; 
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.95);
+            padding: 10px 25px;
+            border-radius: 50px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            z-index: 1000; 
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        .summary-val { font-size: 18px; font-weight: 800; color: #212529; }
+        .summary-label { font-size: 12px; font-weight: 600; color: #6c757d; text-transform: uppercase; }
+
+        /* INFO BOX */
+        .info-box { 
+            padding: 15px;
+            background: rgba(255,255,255,0.95); 
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15); 
+            border-radius: 12px; 
+            position: absolute; 
+            bottom: 30px; 
+            left: 30px; 
+            z-index: 1000; 
+            min-width: 240px;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        .leaflet-tooltip {
+            background: white !important;
+            border: none !important;
+            border-radius: 8px !important;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15) !important;
+            padding: 10px 15px !important;
+            font-weight: 600;
+            font-size: 13px;
+        }
+        /* Harita üzerindeki kalıcı etiketler için stil */
+        .city-label {
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            font-size: 11px;
+            font-weight: bold;
+            color: #333;
+            text-align: center;
+            text-shadow: 1px 1px 0px #fff, -1px -1px 0px #fff, 1px -1px 0px #fff, -1px 1px 0px #fff; /* Yazının okunması için beyaz kontür */
+            padding: 0 !important;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="brand"><i class="fa-solid fa-layer-group me-2"></i> TecnoStore KDS</div>
+        <div style="padding: 10px 25px; font-size: 12px; color: #6c757d; font-weight: bold;">ANALİZ & RAPOR</div>
+        <a href="/"><i class="fa-solid fa-chart-pie me-2"></i> Kokpit</a>
+        <a href="/cografi-analiz" class="active"><i class="fa-solid fa-map-location-dot me-2"></i> Coğrafi Analiz</a>
+        <div style="padding: 10px 25px; font-size: 12px; color: #6c757d; font-weight: bold; margin-top: 20px;">GELECEK PLANLAMA</div>
+        <a href="/simulasyon/yeni"><i class="fa-solid fa-wand-magic-sparkles me-2"></i> Yeni Simülasyon</a>
+        <a href="/simulasyon/gecmis"><i class="fa-solid fa-clock-rotate-left me-2"></i> Geçmiş Simülasyonlar</a>
+    </div>
+
+    <div class="map-wrapper">
+        <div id="map"></div>
+
+        <div class="summary-card" id="summaryCard">
+            <div>
+                <div class="summary-label" id="summaryLabel">TOPLAM CİRO</div>
+                <div class="summary-val" id="summaryValue">Yükleniyor...</div>
+            </div>
+            <i class="fa-solid fa-chart-simple text-primary fs-4" id="summaryIcon"></i>
+        </div>
+
+        <div class="control-panel">
+            <h6 class="border-bottom pb-2">Analiz Parametresi</h6>
+            <button class="btn metric-btn active" onclick="changeMetric('ciro')">
+                <i class="fa-solid fa-wallet me-2"></i> Toplam Ciro
+            </button>
+            <button class="btn metric-btn" onclick="changeMetric('kar')">
+                <i class="fa-solid fa-sack-dollar me-2"></i> Net Kâr
+            </button>
+            <button class="btn metric-btn" onclick="changeMetric('pazarPayi')">
+                <i class="fa-solid fa-chart-pie me-2"></i> Dönemlik Pazar Payı
+            </button>
+            <button class="btn metric-btn" onclick="changeMetric('memnuniyet')">
+                <i class="fa-solid fa-face-smile me-2"></i> Memnuniyet
+            </button>
+
+            <h6 class="border-bottom pb-2 mt-4 text-success">
+                <i class="fa-solid fa-trophy me-1"></i> Top 5 Liderler
+            </h6>
+            <ul class="ranking-list top" id="rankingListTop">
+                <li class="text-center text-muted small py-2">Veri bekleniyor...</li>
+            </ul>
+
+            <h6 class="border-bottom pb-2 mt-4 text-danger">
+                <i class="fa-solid fa-arrow-trend-down me-1"></i> En Düşük 5
+            </h6>
+            <ul class="ranking-list bottom" id="rankingListBottom">
+                <li class="text-center text-muted small py-2">Veri bekleniyor...</li>
+            </ul>
+        </div>
+
+        <div class="info-box" id="infoBox">
+            <h6 class="fw-bold mb-1">Şehir Detayı</h6>
+            <div class="text-muted small">Bir ilin üzerine gelin...</div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <script>
+        let map;
+        let geojsonLayer;
+        let dbData = {}; 
+        let dataArray = []; 
+        let currentMetric = 'ciro';
+
+        function initMap() {
+            map = L.map('map', { center: [39.0, 35.5], zoom: 6, zoomControl: false });
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; CARTO', subdomains: 'abcd', maxZoom: 19
+            }).addTo(map);
+            loadData();
+        }
+
+        async function loadData() {
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                const simId = urlParams.get('simId');
+                
+                let apiUrl = '/cografi-analiz/data';
+                if (simId) {
+                    apiUrl += `?simId=${simId}`;
+                    document.querySelector('a[href="/"]').href = `/?simId=${simId}`;
+                    document.querySelector('.summary-card').style.border = "2px solid #ffc107"; 
+                }
+
+                const response = await fetch(apiUrl);
+                const backendResponse = await response.json();
+                
+                // BACKEND YAPISI: { cities: [...], summary: {...} }
+                // Eğer eski yapıdaysa (direkt array) uyumluluk sağla
+                if (Array.isArray(backendResponse)) {
+                    dataArray = backendResponse;
+                } else {
+                    dataArray = backendResponse.cities || [];
+                    // Backend sıralamayı gönderiyorsa onu da kullanabiliriz ama 
+                    // şimdilik frontend sıralaması ile devam edelim, daha esnek.
+                }
+                
+                dataArray.forEach(item => { dbData[item.sehir] = item; }); 
+
+                const geoResponse = await fetch('https://raw.githubusercontent.com/alpers/Turkey-Maps-GeoJSON/master/tr-cities.json');
+                const geoData = await geoResponse.json();
+
+                drawMap(geoData);
+                updateDashboardComponents(); 
+
+            } catch (error) {
+                console.error(error);
+                alert("Harita verisi yüklenemedi: " + error.message);
+            }
+        }
+
+        function getColor(val, metric) {
+            // DÜZELTME BURADA: Değer yoksa, null ise veya 0 ise BEYAZ (#ffffff) döndür.
+            if (!val || val === 0) return '#ffffff';
+
+            if (metric === 'ciro') {
+                return val > 1000000000 ? '#99000d' : 
+                       val > 500000000  ? '#cb181d' : 
+                       val > 250000000  ? '#ef3b2c' : 
+                       val > 100000000  ? '#fb6a4a' : 
+                       val > 50000000   ? '#fc9272' : '#fee5d9';
+            } else if (metric === 'kar') {
+                return val > 200000000 ? '#00441b' : 
+                       val > 100000000 ? '#006d2c' : 
+                       val > 50000000  ? '#238b45' : 
+                       val > 20000000  ? '#41ab5d' : '#c7e9c0';
+            } else if (metric === 'pazarPayi') {
+                return val > 10 ? '#7f2704' : 
+                       val > 5 ? '#a63603' : 
+                       val > 3 ? '#d94801' : 
+                       val > 1  ? '#f16913' : '#feedde';
+            } else {
+                // Memnuniyet Renkleri
+                return val >= 4.5 ? '#2b8a3e' : 
+                       val >= 4.0 ? '#69db7c' : 
+                       val >= 3.0 ? '#ffe066' : 
+                       val >= 2.0 ? '#ff8787' : '#c92a2a'; 
+            }
+        }
+
+        function style(feature) {
+            const cityName = feature.properties.name;
+            const cityData = dbData[cityName] || dbData[cityName.toLocaleUpperCase('tr-TR')];
+            const value = cityData ? parseFloat(cityData[currentMetric]) : 0;
+            return { fillColor: getColor(value, currentMetric), weight: 1, opacity: 1, color: '#999', fillOpacity: 0.85 };
+        }
+
+        function drawMap(geoData) {
+            if(geojsonLayer) map.removeLayer(geojsonLayer);
+            geojsonLayer = L.geoJson(geoData, { 
+                style: style, 
+                onEachFeature: (feature, layer) => {
+                    const cityName = feature.properties.name;
+                    const d = dbData[cityName] || dbData[cityName.toLocaleUpperCase('tr-TR')];
+                    
+
+                    if(d) {
+                        const val = formatValue(parseFloat(d[currentMetric]), currentMetric);
+                        
+                        // permanent: true -> Sürekli açık kalmasını sağlar
+                        // direction: "center" -> Şehrin tam ortasına koyar
+                        // className: "city-label" -> Yukarıda yazdığımız CSS'i uygular
+                        
+                        layer.bindTooltip(`${cityName}<br><span style="color:#000; font-weight:normal;">${val}</span>`, { 
+                            permanent: true, 
+                            direction: "center",
+                            className: "city-label"
+                        });
+                    }
+                    
+                    layer.on({
+                        mouseover: (e) => {
+                            e.target.setStyle({ weight: 3, color: '#333', fillOpacity: 1 });
+                            updateInfoBox(cityName); // SOL ALT KUTU GÜNCELLE
+                        },
+                        mouseout: (e) => {
+                            geojsonLayer.resetStyle(e.target);
+                            document.getElementById('infoBox').innerHTML = '<h6 class="fw-bold mb-1">Şehir Detayı</h6><div class="text-muted small">Bir ilin üzerine gelin...</div>';
+                        }
+                    });
+                } 
+            }).addTo(map);
+        }
+
+        function updateDashboardComponents() {
+            updateSummaryCard();
+            updateRankingLists();
+        }
+
+        function updateSummaryCard() {
+            let total = 0;
+            let count = 0;
+            dataArray.forEach(item => {
+                total += (parseFloat(item[currentMetric]) || 0);
+                count++;
+            });
+
+            let displayVal = total;
+            let prefix = "TOPLAM ";
+            let icon = "fa-chart-simple";
+            
+            if (currentMetric === 'memnuniyet' || currentMetric === 'pazarPayi') {
+                displayVal = total / (count || 1);
+                prefix = "ORTALAMA ";
+            }
+
+            if(currentMetric === 'kar') icon = "fa-sack-dollar";
+            if(currentMetric === 'memnuniyet') icon = "fa-face-smile";
+
+            document.getElementById('summaryLabel').innerText = prefix + getMetricLabel(currentMetric).toUpperCase();
+            document.getElementById('summaryValue').innerText = formatValue(displayVal, currentMetric);
+            document.getElementById('summaryIcon').className = `fa-solid ${icon} text-primary fs-4`;
+        }
+
+        // SIRALAMA LİSTESİ (Top 5 / Bottom 5)
+        function updateRankingLists() {
+            // Veriyi seçili metriğe göre sırala
+            const sortedDesc = [...dataArray].sort((a, b) => parseFloat(b[currentMetric]) - parseFloat(a[currentMetric]));
+            
+            // --- TOP 5 LİSTESİ ---
+            const top5 = sortedDesc.slice(0, 5);
+            const listTop = document.getElementById('rankingListTop');
+            listTop.innerHTML = '';
+
+            top5.forEach((item, index) => {
+                const li = document.createElement('li');
+                li.className = 'ranking-item';
+                li.innerHTML = `
+                    <div class="d-flex align-items-center">
+                        <div class="rank-num">${index + 1}</div>
+                        <span class="fw-bold text-dark">${item.sehir}</span>
+                    </div>
+                    <span class="fw-bold text-primary">${formatValue(parseFloat(item[currentMetric]), currentMetric)}</span>
+                `;
+                listTop.appendChild(li);
+            });
+
+            // --- BOTTOM 5 LİSTESİ ---
+            // Sadece değeri 0'dan büyük olanları alalım (Memnuniyet için > 0)
+            const activeCities = sortedDesc.filter(x => parseFloat(x[currentMetric]) > 0);
+            const bottom5 = activeCities.slice(-5).reverse(); 
+            
+            const listBottom = document.getElementById('rankingListBottom');
+            listBottom.innerHTML = '';
+
+            if (bottom5.length === 0) {
+                listBottom.innerHTML = '<li class="text-center text-muted small">Veri yok</li>';
+            } else {
+                bottom5.forEach((item, index) => {
+                    const li = document.createElement('li');
+                    li.className = 'ranking-item';
+                    li.innerHTML = `
+                        <div class="d-flex align-items-center">
+                            <div class="rank-num">${index + 1}</div>
+                            <span class="fw-bold text-dark">${item.sehir}</span>
+                        </div>
+                        <span class="fw-bold text-danger">${formatValue(parseFloat(item[currentMetric]), currentMetric)}</span>
+                    `;
+                    listBottom.appendChild(li);
+                });
+            }
+        }
+
+        // SOL ALT DETAY KUTUSU (HER ŞEY DAHİL)
+        function updateInfoBox(cityName) {
+            const d = dbData[cityName] || dbData[cityName.toLocaleUpperCase('tr-TR')];
+            const box = document.getElementById('infoBox');
+            
+            if (d) {
+                box.innerHTML = `
+                    <h5 class="fw-bold mb-3 text-dark border-bottom pb-2">${cityName}</h5>
+                    <div class="d-flex justify-content-between mb-2 small">
+                        <span class="text-muted">Toplam Ciro:</span>
+                        <span class="fw-bold text-dark">${formatValue(parseFloat(d.ciro), 'ciro')}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2 small">
+                        <span class="text-muted">Net Kâr:</span>
+                        <span class="fw-bold text-success">${formatValue(parseFloat(d.kar), 'kar')}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2 small">
+                        <span class="text-muted">Pazar Payı:</span>
+                        <span class="fw-bold text-warning">%${parseFloat(d.pazarPayi).toFixed(1)}</span>
+                    </div>
+                    <div class="d-flex justify-content-between small">
+                        <span class="text-muted">Memnuniyet:</span>
+                        <span class="fw-bold text-info">⭐ ${parseFloat(d.memnuniyet).toFixed(1)} / 5</span>
+                    </div>
+                `;
+            } else {
+                box.innerHTML = `<h5 class="fw-bold mb-1">${cityName}</h5><span class="badge bg-secondary">Veri Yok</span>`;
+            }
+        }
+
+        // METRİK DEĞİŞİMİ (DİNAMİK TOOLTIP)
+        function changeMetric(metric) {
+            currentMetric = metric;
+            document.querySelectorAll('.metric-btn').forEach(btn => btn.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            
+            if(geojsonLayer) {
+                geojsonLayer.setStyle(style);
+                // TOOLTIP GÜNCELLEME (POP-UP)
+                geojsonLayer.eachLayer(function(layer) {
+                    const cityName = layer.feature.properties.name;
+                    const d = dbData[cityName] || dbData[cityName.toLocaleUpperCase('tr-TR')];
+                    if(d) {
+                        const val = formatValue(parseFloat(d[currentMetric]), currentMetric);
+                        layer.setTooltipContent(`<strong>${cityName}</strong><br>${getMetricLabel(currentMetric)}: ${val}`);
+                    }
+                });
+            }
+            updateDashboardComponents(); 
+        }
+
+        function getMetricLabel(metric) {
+            if(metric === 'ciro') return 'Ciro';
+            if(metric === 'kar') return 'Net Kâr';
+            if(metric === 'pazarPayi') return 'Pazar Payı';
+            return 'Memnuniyet';
+        }
+
+        function formatValue(val, metric) {
+            if (metric === 'ciro' || metric === 'kar') {
+                if (val >= 1000000000) return (val / 1000000000).toFixed(1) + ' Mr ₺';
+                if (val >= 1000000) return (val / 1000000).toFixed(1) + ' Mn ₺';
+                return new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY', maximumFractionDigits: 0 }).format(val);
+            }
+            if (metric === 'pazarPayi') return '%' + val.toFixed(1);
+            if (metric === 'memnuniyet') return val.toFixed(1) + ' / 5';
+            return val;
+        }
+
+        document.addEventListener('DOMContentLoaded', initMap);
+    </script>
+</body>
+</html>

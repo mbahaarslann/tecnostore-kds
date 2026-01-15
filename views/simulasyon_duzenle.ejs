@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Simülasyon Düzenle | TecnoStore KDS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background-color: #f4f6f9; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .card { width: 100%; max-width: 500px; border: none; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .form-label { font-weight: 600; color: #495057; }
+        .btn-primary { background: linear-gradient(135deg, #4e73df, #224abe); border: none; padding: 10px 20px; font-weight: 600; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(78, 115, 223, 0.4); }
+    </style>
+</head>
+<body>
+
+    <div class="card p-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="mb-0 fw-bold text-secondary"><i class="fa-solid fa-pen-to-square me-2"></i>Düzenle</h4>
+            <a href="/simulasyon/gecmis" class="btn btn-sm btn-outline-secondary"><i class="fa-solid fa-xmark"></i></a>
+        </div>
+
+        <form id="editForm">
+            <input type="hidden" id="simId" value="<%= simulasyon.id %>">
+            
+            <div class="mb-3">
+                <label for="simName" class="form-label">Simülasyon Adı</label>
+                <input type="text" class="form-control" id="simName" value="<%= simulasyon.simulasyon_adi %>" required>
+            </div>
+
+            <div class="mb-4">
+                <label for="scenarioType" class="form-label">Senaryo Tipi</label>
+                <select class="form-select" id="scenarioType">
+                    <option value="Normal" <%= simulasyon.senaryo_tipi === 'Normal' ? 'selected' : '' %>>Normal</option>
+                    <option value="Iyimser" <%= ['Iyimser', 'İyimser'].includes(simulasyon.senaryo_tipi) ? 'selected' : '' %>>İyimser</option>
+                    <option value="Kotumser" <%= ['Kotumser', 'Kötümser'].includes(simulasyon.senaryo_tipi) ? 'selected' : '' %>>Kötümser</option>
+                </select>
+            </div>
+
+            <div class="d-grid">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fa-regular fa-floppy-disk me-2"></i>Değişiklikleri Kaydet
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('editForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const simId = document.getElementById('simId').value;
+            const simName = document.getElementById('simName').value;
+            const scenarioType = document.getElementById('scenarioType').value;
+
+            try {
+                const response = await fetch(`/simulasyon/${simId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sim_name: simName, scenarioType: scenarioType })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert('✅ Güncelleme Başarılı!');
+                    window.location.href = '/simulasyon/gecmis';
+                } else {
+                    alert('❌ Hata: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Hata:', error);
+                alert('❌ Bir hata oluştu.');
+            }
+        });
+    </script>
+
+</body>
+</html>

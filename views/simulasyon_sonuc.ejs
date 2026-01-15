@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simülasyon Raporu | TecnoStore KDS</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body { 
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            min-height: 100vh;
+            padding-bottom: 50px;
+        }
+        .main-container { 
+            max-width: 1200px;
+            margin: 30px auto; 
+            padding: 0 20px;
+            animation: fadeIn 0.5s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .card { 
+            border: none;
+            border-radius: 16px; 
+            box-shadow: 0 8px 30px rgba(0,0,0,0.08); 
+            margin-bottom: 25px; 
+            transition: all 0.3s ease;
+            border: 1px solid rgba(0,0,0,0.05);
+            background: white;
+        }
+        .card:hover {
+            box-shadow: 0 12px 40px rgba(0,0,0,0.12);
+            transform: translateY(-3px);
+        }
+        
+        /* Senaryo Sekmeleri */
+        .scenario-tab { 
+            cursor: pointer;
+            padding: 20px; 
+            border-radius: 12px; 
+            transition: all 0.3s ease; 
+            text-align: center; 
+            border: 3px solid transparent;
+        }
+        .scenario-tab:hover { 
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            transform: translateY(-5px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .scenario-tab.active { 
+            border-color: #4e73df;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef); 
+            box-shadow: 0 6px 20px rgba(78, 115, 223, 0.3);
+        }
+
+        /* Yeni Kıyaslama Kutuları */
+        .comparison-box {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+        }
+        .comp-label { 
+            font-size: 11px; 
+            text-transform: uppercase; 
+            color: #6c757d; 
+            font-weight: 700; 
+            margin-bottom: 8px; 
+            letter-spacing: 0.5px;
+        }
+        .comp-val-old { 
+            font-size: 1.1rem; 
+            font-weight: 600; 
+            color: #adb5bd; 
+            text-decoration: line-through; 
+        }
+        .comp-val-new { 
+            font-size: 1.8rem; 
+            font-weight: 800; 
+            color: #212529; 
+        }
+        
+        /* Değişim Rozetleri */
+        .diff-badge { 
+            font-size: 13px; 
+            padding: 5px 10px; 
+            border-radius: 8px; 
+            display: inline-block; 
+            margin-top: 5px; 
+            font-weight: 700;
+        }
+        .diff-up { background: #d1e7dd; color: #0f5132; }
+        .diff-down { background: #f8d7da; color: #842029; }
+
+        /* Üst Parametre Rozetleri */
+        .badge-param { 
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            color: #495057; 
+            padding: 10px 16px; 
+            border-radius: 25px; 
+            font-weight: 600; 
+            margin-right: 8px; 
+            margin-bottom: 8px;
+            display: inline-block;
+            border: 2px solid #e0e0e0;
+            transition: all 0.3s;
+        }
+        .badge-param:hover {
+            border-color: #4e73df;
+            transform: translateY(-2px);
+        }
+
+        .btn { border-radius: 10px; font-weight: 600; transition: all 0.3s; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        .btn-primary { background: linear-gradient(135deg, #4e73df, #224abe); border: none; }
+    </style>
+</head>
+<body>
+
+<div class="main-container">
+    
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h6 class="text-muted text-uppercase mb-1">Simülasyon Sonucu (ID: #<%= simId %>)</h6>
+            <h2 class="fw-bold text-dark"><i class="fa-solid fa-flask me-2"></i> <%= baslik %></h2>
+        </div>
+        <a href="/simulasyon/yeni" class="btn btn-outline-secondary"><i class="fa-solid fa-arrow-left me-2"></i> Yeni Simülasyon</a>
+    </div>
+
+    <div class="mb-4">
+        <span class="badge-param"><i class="fa-regular fa-calendar me-2"></i>Süre: <%= sure %> Ay</span>
+        <span class="badge-param"><i class="fa-solid fa-tag me-2"></i>Fiyat: <%= parametreler.zam %>%</span>
+        <span class="badge-param"><i class="fa-solid fa-money-bill me-2"></i>Dolar: <%= parametreler.dolar %>₺</span>
+        <span class="badge-param"><i class="fa-solid fa-arrow-trend-up me-2"></i>Enflasyon: <%= parametreler.enflasyon %>%</span>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card scenario-tab" onclick="switchScenario('kotumser')">
+                <h5 class="text-danger"><i class="fa-solid fa-cloud-rain me-2"></i>Kötümser</h5>
+                <small class="text-muted">Yüksek Fiyat Duyarlılığı</small>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card scenario-tab active" onclick="switchScenario('normal')">
+                <h5 class="text-primary"><i class="fa-solid fa-scale-balanced me-2"></i>Normal Beklenti</h5>
+                <small class="text-muted">Standart Piyasa Koşulları</small>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card scenario-tab" onclick="switchScenario('iyimser')">
+                <h5 class="text-success"><i class="fa-solid fa-sun me-2"></i>İyimser</h5>
+                <small class="text-muted">Düşük Duyarlılık, Yüksek Talep</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+                    <h5 class="text-secondary m-0 fw-bold">Kıyaslamalı Finansal Rapor</h5>
+                    <span class="badge bg-secondary"><i class="fa-solid fa-clock-rotate-left me-1"></i> <%= gecmis.baslik %> vs Simülasyon</span>
+                </div>
+                
+                <div class="card mb-3 border-0 bg-light">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-3 border-end text-center">
+                                <div class="comp-label">GERÇEKLEŞEN (ESKİ)</div>
+                                <div class="comp-val-old" id="oldCiro">...</div>
+                            </div>
+                            <div class="col-md-6 text-center">
+                                <div class="comp-label">TAHMİNİ CİRO</div>
+                                <div class="comp-val-new" id="dispCiro">...</div>
+                                <div id="diffCiroTag" class="diff-badge">...</div>
+                            </div>
+                            <div class="col-md-3 border-start text-center">
+                                <div class="comp-label">BEKLENEN</div>
+                                <div class="fs-6 fw-bold text-primary">Gelecek <%= sure %> Ay</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-3 border-0 bg-light">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-3 border-end text-center">
+                                <div class="comp-label">GERÇEKLEŞEN (ESKİ)</div>
+                                <div class="comp-val-old" id="oldKar">...</div>
+                            </div>
+                            <div class="col-md-6 text-center">
+                                <div class="comp-label">TAHMİNİ NET KÂR</div>
+                                <div class="comp-val-new text-success" id="dispKar">...</div>
+                                <div id="diffKarTag" class="diff-badge">...</div>
+                            </div>
+                            <div class="col-md-3 border-start text-center">
+                                <i class="fa-solid fa-chart-line fs-1 text-success opacity-25"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-5">
+                        <div class="card border p-3 h-100">
+                            <div class="comp-label text-center">PAZAR PAYI DEĞİŞİMİ</div>
+                            <div class="d-flex justify-content-between align-items-center mt-3 px-2">
+                                <div class="text-center">
+                                    <small class="d-block text-muted">Eski</small>
+                                    <span class="fw-bold" id="oldPazar">...</span>
+                                </div>
+                                <i class="fa-solid fa-arrow-right text-muted"></i>
+                                <div class="text-center">
+                                    <small class="d-block text-muted">Yeni</small>
+                                    <span class="fw-bold fs-4 text-primary" id="dispPazar">...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-7">
+                        <div class="alert alert-info m-0 h-100 d-flex align-items-center">
+                             <div>
+                                 <h6 class="fw-bold mb-1"><i class="fa-solid fa-robot me-2"></i>Yapay Zeka Görüşü:</h6>
+                                 <span id="analysisText" class="small"><%= ai_analysis %></span>
+                             </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card p-4 bg-light mb-4">
+                <h5 class="mb-3 fw-bold">Karar Zamanı</h5>
+                <p class="text-muted small">Bu senaryo sonuçlarını beğendiyseniz, ana dashboard'da kullanmak üzere kaydedebilirsiniz.</p>
+                
+                <div class="d-grid gap-2">
+                    <button class="btn btn-primary" onclick="saveSelectedScenario()">
+                        <i class="fa-solid fa-check me-2"></i> Bu Senaryoyu Kaydet
+                    </button>
+                    <button class="btn btn-outline-danger" onclick="window.location.href='/simulasyon/yeni'">
+                        <i class="fa-solid fa-xmark me-2"></i> İptal Et
+                    </button>
+                </div>
+            </div>
+            
+            <div class="card p-4">
+                <h6 class="fw-bold"><i class="fa-solid fa-magnet me-2 text-warning"></i>Fiyat Esnekliği</h6>
+                <p class="small text-muted mb-0 mt-2">
+                    Seçili senaryoda müşterilerin fiyat değişimine tepkisi <strong id="elasticityText">Normal</strong> seviyededir.
+                    <% if (parametreler.zam > 0) { %>
+                        Yapılan <strong>%<%= parametreler.zam %></strong> zam, satış adetlerinde düşüşe neden olabilir ancak ciro artışı bunu telafi edebilir.
+                    <% } else { %>
+                        Yapılan indirim, satış adetlerini artırarak sürümden kazanmanızı sağlayabilir.
+                    <% } %>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // SUNUCUDAN GELEN VERİLER
+    const data = {
+        gecmis: <%- JSON.stringify(gecmis) %>,
+        normal: <%- JSON.stringify(normal) %>,
+        iyimser: <%- JSON.stringify(iyimser) %>,
+        kotumser: <%- JSON.stringify(kotumser) %>
+    };
+
+    let selectedScenarioType = 'normal';
+    
+    // Para Formatı
+    const fmt = (num) => new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY', maximumFractionDigits: 0 }).format(num);
+
+    function switchScenario(type) {
+        selectedScenarioType = type;
+
+        // Sekmeleri güncelle
+        document.querySelectorAll('.scenario-tab').forEach(el => el.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+
+        // Verileri al
+        const current = data[type]; // Simülasyon verisi (Normal/İyimser/Kötümser)
+        const past = data.gecmis;   // Sabit geçmiş veri
+
+        // --- DOM GÜNCELLEME ---
+
+        // 1. Ciro
+        document.getElementById('oldCiro').innerText = fmt(past.ciro);
+        document.getElementById('dispCiro').innerText = fmt(current.ciro);
+        updateDiffBadge('diffCiroTag', current.ciro, past.ciro);
+
+        // 2. Kâr
+        document.getElementById('oldKar').innerText = fmt(past.kar);
+        document.getElementById('dispKar').innerText = fmt(current.kar);
+        updateDiffBadge('diffKarTag', current.kar, past.kar);
+
+        // 3. Pazar Payı
+        const pazarOld = past.pazarPayi ? '%' + past.pazarPayi.toFixed(2) : '%0';
+        const pazarNew = current.pazarPayi ? '%' + current.pazarPayi.toFixed(2) : '%0';
+        
+        document.getElementById('oldPazar').innerText = pazarOld;
+        document.getElementById('dispPazar').innerText = pazarNew;
+
+        // Analiz Yazısı Güncelle
+        const farkYuzde = ((current.ciro - past.ciro) / past.ciro) * 100;
+        let analiz = "";
+        let esneklikText = "";
+        
+        if (type === 'normal') esneklikText = "Normal (-1.2)";
+        else if (type === 'iyimser') esneklikText = "Düşük (-0.8)";
+        else esneklikText = "Yüksek (-1.6)";
+
+        document.getElementById('elasticityText').innerText = esneklikText;
+
+        if(farkYuzde > 0) analiz = `Harika! ${type.toUpperCase()} senaryoda cironuzu geçmiş döneme göre %${farkYuzde.toFixed(1)} artırıyorsunuz.`;
+        else analiz = `Dikkat! ${type.toUpperCase()} senaryoda ciroda %${Math.abs(farkYuzde).toFixed(1)} düşüş öngörülüyor.`;
+        
+        document.getElementById('analysisText').innerText = analiz;
+    }
+
+    // Değişim Rozeti Rengi Ayarla
+    function updateDiffBadge(elementId, newVal, oldVal) {
+        const el = document.getElementById(elementId);
+        const diff = newVal - oldVal;
+        const percent = (diff / oldVal) * 100;
+        
+        if (diff >= 0) {
+            el.className = 'diff-badge diff-up';
+            el.innerHTML = `<i class="fa-solid fa-arrow-up me-1"></i>%${percent.toFixed(1)}`;
+        } else {
+            el.className = 'diff-badge diff-down';
+            el.innerHTML = `<i class="fa-solid fa-arrow-down me-1"></i>%${Math.abs(percent).toFixed(1)}`;
+        }
+    }
+
+    // Senaryoyu Kaydet
+    async function saveSelectedScenario() {
+        if(!confirm('Bu senaryoyu ana ekranınız için varsayılan olarak kaydetmek istiyor musunuz?')) return;
+
+        try {
+            const selectedScenario = data[selectedScenarioType];
+            const response = await fetch('/simulasyon/guncelle', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    simId: <%= simId %>,
+                    scenarioType: selectedScenarioType,
+                    scenarioDetails: selectedScenario.detaylar
+                })
+            });
+            const result = await response.json();
+            
+            if (result.success) {
+                alert('✅ Senaryo başarıyla kaydedildi!');
+                window.location.href = '/?simId=<%= simId %>';
+            } else {
+                alert('❌ Hata: ' + result.message);
+            }
+        } catch (error) {
+            console.error('Hata:', error);
+            alert('❌ Bir hata oluştu.');
+        }
+    }
+
+    // Başlangıçta Çalıştır
+    document.addEventListener('DOMContentLoaded', () => {
+        // Normal senaryoyu yükle
+        switchScenario('normal');
+        
+        // Tablara tıklama özelliği (Zaten onclick var HTML'de ama class yönetimi için)
+        // switchScenario fonksiyonu class'ları hallediyor.
+    });
+</script>
+
+</body>
+</html>

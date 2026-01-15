@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="tr" id="htmlRoot">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TecnoStore KDS | Yönetici Kokpiti</title>
+    
+    <!-- Theme Persistence Script (Must run before body loads to prevent flash) -->
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            const htmlElement = document.documentElement;
+            if (savedTheme === 'dark') {
+                htmlElement.setAttribute('data-bs-theme', 'dark');
+            } else {
+                htmlElement.setAttribute('data-bs-theme', 'light');
+            }
+        })();
+    </script>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        * { box-sizing: border-box; }
+        body { 
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            min-height: 100vh;
+            transition: background 0.3s ease;
+        }
+        
+        /* Dark Mode Body Background */
+        [data-bs-theme="dark"] body {
+            background: linear-gradient(135deg, #1a1d29 0%, #2d3142 100%);
+        }
+        
+        /* SIDEBAR & LAYOUT */
+        .sidebar { 
+            height: 100vh; 
+            width: 260px; 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            background: linear-gradient(180deg, #1a1d29 0%, #2d3142 100%); 
+            padding-top: 25px; 
+            color: white; 
+            z-index: 1000; 
+            box-shadow: 4px 0 20px rgba(0,0,0,0.1);
+            transition: background 0.3s ease;
+        }
+        
+        /* Dark Mode Sidebar (slightly lighter for contrast) */
+        [data-bs-theme="dark"] .sidebar {
+            background: linear-gradient(180deg, #2d3142 0%, #3d4152 100%);
+        }
+        .sidebar a { 
+            padding: 16px 25px; 
+            text-decoration: none; 
+            font-size: 15px; 
+            color: #b8bcc8; 
+            display: block; 
+            border-left: 3px solid transparent; 
+            transition: all 0.3s ease; 
+            margin: 2px 10px;
+            border-radius: 8px;
+        }
+        .sidebar a:hover { 
+            background: rgba(255,255,255,0.1); 
+            color: #fff; 
+            transform: translateX(5px);
+        }
+        .sidebar a.active { 
+            background: linear-gradient(135deg, #4e73df, #224abe); 
+            color: #fff; 
+            border-left-color: #fff;
+            box-shadow: 0 4px 15px rgba(78, 115, 223, 0.3);
+        }
+        .sidebar .brand { 
+            font-size: 22px; 
+            font-weight: 700; 
+            text-align: center; 
+            margin-bottom: 40px; 
+            color: #fff; 
+            letter-spacing: 1.5px; 
+            padding: 0 20px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        .sidebar-heading { 
+            padding: 15px 25px; 
+            font-size: 11px; 
+            text-transform: uppercase; 
+            color: #6c757d; 
+            font-weight: 700; 
+            letter-spacing: 1px;
+            margin-top: 15px;
+        }
+        .main-content { 
+            margin-left: 260px; 
+            padding: 30px; 
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* HEADER & CARDS */
+        .top-navbar { 
+            background: white; 
+            padding: 20px 30px; 
+            border-radius: 15px; 
+            box-shadow: 0 4px 25px rgba(0,0,0,0.08); 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 30px; 
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: all 0.3s ease;
+        }
+        
+        /* Dark Mode Navbar */
+        [data-bs-theme="dark"] .top-navbar {
+            background: #2d3142;
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 4px 25px rgba(0,0,0,0.3);
+        }
+        
+        /* Theme Toggle Button */
+        .theme-toggle {
+            background: transparent;
+            border: 2px solid #dee2e6;
+            border-radius: 50px;
+            padding: 8px 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #495057;
+            font-weight: 600;
+        }
+        
+        .theme-toggle:hover {
+            border-color: #4e73df;
+            background: rgba(78, 115, 223, 0.1);
+            transform: scale(1.05);
+        }
+        
+        [data-bs-theme="dark"] .theme-toggle {
+            border-color: rgba(255,255,255,0.2);
+            color: #e2e8f0;
+        }
+        
+        [data-bs-theme="dark"] .theme-toggle:hover {
+            border-color: #4e73df;
+            background: rgba(78, 115, 223, 0.2);
+        }
+        .scenario-box { 
+            display: flex; 
+            align-items: center; 
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef); 
+            padding: 8px 20px; 
+            border-radius: 50px; 
+            border: 2px solid #dee2e6; 
+            transition: all 0.3s;
+        }
+        
+        [data-bs-theme="dark"] .scenario-box {
+            background: linear-gradient(135deg, #3d4152, #2d3142);
+            border-color: rgba(255,255,255,0.1);
+        }
+        .scenario-box:hover {
+            border-color: #4e73df;
+            box-shadow: 0 4px 15px rgba(78, 115, 223, 0.2);
+        }
+        .scenario-select { 
+            border: none; 
+            background: transparent; 
+            font-weight: 600; 
+            color: #495057; 
+            outline: none; 
+            margin-left: 10px; 
+            cursor: pointer; 
+            font-size: 14px;
+        }
+        .kpi-card { 
+            border: none; 
+            border-radius: 16px; 
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12); 
+            transition: all 0.3s ease; 
+            overflow: hidden; 
+            position: relative; 
+            backdrop-filter: blur(10px);
+        }
+        .kpi-card:hover { 
+            transform: translateY(-8px) scale(1.02); 
+            box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+        }
+        .kpi-icon { 
+            font-size: 60px; 
+            opacity: 0.2; 
+            position: absolute; 
+            right: 20px; 
+            top: 20px; 
+            transform: rotate(-15deg);
+            transition: all 0.3s;
+        }
+        .kpi-card:hover .kpi-icon {
+            transform: rotate(0deg) scale(1.1);
+            opacity: 0.3;
+        }
+        .bg-blue { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            color: white; 
+        }
+        .bg-green { 
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); 
+            color: white; 
+        }
+        .bg-orange { 
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); 
+            color: white; 
+        }
+
+        /* CHART BOXES */
+        .chart-container { 
+            background: white; 
+            padding: 30px; 
+            border-radius: 16px; 
+            box-shadow: 0 8px 30px rgba(0,0,0,0.08); 
+            margin-bottom: 30px; 
+            position: relative; 
+            height: 420px; 
+            width: 100%; 
+            transition: all 0.3s ease;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        [data-bs-theme="dark"] .chart-container {
+            background: #2d3142;
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+        }
+        .chart-container:hover {
+            box-shadow: 0 12px 40px rgba(0,0,0,0.12);
+            transform: translateY(-2px);
+        }
+        .chart-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 25px; 
+            padding-bottom: 20px; 
+            border-bottom: 2px solid #f0f0f0; 
+        }
+        
+        [data-bs-theme="dark"] .chart-header {
+            border-bottom-color: rgba(255,255,255,0.1);
+        }
+        .chart-header h6 {
+            font-size: 16px;
+            font-weight: 700;
+            margin: 0;
+        }
+        .chart-wrapper { 
+            position: relative; 
+            height: 320px; 
+            width: 100%; 
+        }
+        
+        /* ALERT STYLING */
+        .alert {
+            border-radius: 12px;
+            border: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            animation: slideIn 0.5s ease;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        /* BUTTON STYLING */
+        .btn {
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
+        /* DROPDOWN STYLING */
+        .dropdown-menu {
+            border-radius: 10px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            border: none;
+            padding: 8px;
+        }
+        .dropdown-item {
+            border-radius: 6px;
+            padding: 10px 15px;
+            transition: all 0.2s;
+        }
+        .dropdown-item:hover {
+            background: linear-gradient(135deg, #4e73df, #224abe);
+            color: white;
+            transform: translateX(5px);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="brand"><i class="fa-solid fa-layer-group me-2"></i> TecnoStore <span style="color:#0d6efd">KDS</span></div>
+        <div class="sidebar-heading">Analiz & Rapor</div>
+        <a href="/" class="active"><i class="fa-solid fa-chart-pie me-2"></i> Kokpit (Dashboard)</a>
+        <a href="/cografi-analiz"><i class="fa-solid fa-map-location-dot me-2"></i> Coğrafi Analiz</a>
+        <div class="sidebar-heading mt-3">Gelecek Planlama</div>
+        <a href="/simulasyon/yeni"><i class="fa-solid fa-wand-magic-sparkles me-2"></i> Yeni Simülasyon</a>
+        <a href="/simulasyon/gecmis"><i class="fa-solid fa-clock-rotate-left me-2"></i> Geçmiş Simülasyonlar</a>
+    </div>
+
+    <div class="main-content">
+        
+        <div class="top-navbar">
+            <div>
+                <h5 class="mb-0 fw-bold text-secondary">Genel Durum Özeti</h5>
+                <small class="text-muted">Son Güncelleme: <%= new Date().toLocaleDateString('tr-TR') %></small>
+            </div>
+            
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <div class="scenario-box">
+                    <i class="fa-solid fa-filter text-primary"></i>
+                    <select class="scenario-select" onchange="if(this.value === 'current') { window.location.href='/' } else { window.location.href='/?simId=' + this.value }">
+                        <option value="current" <%= (!selectedSimId) ? 'selected' : '' %>>🟢 Gerçek Veriler (Mevcut Durum)</option>
+                        <% if (typeof simulasyonlar !== 'undefined' && simulasyonlar.length > 0) { %>
+                            <optgroup label="Kayıtlı Senaryolar">
+                                <% simulasyonlar.forEach(sim => { %>
+                                    <option value="<%= sim.id %>" <%= (selectedSimId == sim.id) ? 'selected' : '' %>>🧪 <%= sim.simulasyon_adi %></option>
+                                <% }) %>
+                            </optgroup>
+                        <% } %>
+                    </select>
+                </div>
+                
+                <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Tema Değiştir">
+                    <i class="fa-solid fa-sun" id="themeIcon"></i>
+                    <span id="themeText">Açık</span>
+                </button>
+            </div>
+        </div>
+
+        <% if (typeof mod !== 'undefined' && mod === 'sim') { %>
+            <div class="alert alert-warning border-2 d-flex align-items-center mb-4" role="alert">
+                <i class="fa-solid fa-triangle-exclamation fs-4 me-3"></i>
+                <div>
+                    <strong>DİKKAT: SİMÜLASYON MODUNDASINIZ!</strong><br>
+                    Şu an görüntülenen veriler gerçek değildir. Tahmini değerlerdir. <a href="/" class="alert-link">Gerçek verilere dönmek için tıklayın.</a>
+                </div>
+            </div>
+        <% } %>
+
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card kpi-card bg-blue h-100 py-3">
+                    <div class="card-body">
+                        <div class="text-uppercase small fw-bold opacity-75">Toplam Ciro</div>
+                        <div class="display-6 fw-bold mt-2"><%= Number(ciro).toLocaleString('tr-TR', { style: 'currency', currency: 'TRY', maximumFractionDigits: 0 }) %></div>
+                        <i class="fa-solid fa-wallet kpi-icon"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card kpi-card bg-green h-100 py-3">
+                    <div class="card-body">
+                        <div class="text-uppercase small fw-bold opacity-75">Toplam İşlem</div>
+                        <div class="display-6 fw-bold mt-2"><%= Number(islem).toLocaleString('tr-TR') %></div>
+                        <i class="fa-solid fa-basket-shopping kpi-icon"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card kpi-card bg-orange h-100 py-3">
+                    <div class="card-body">
+                        <div class="text-uppercase small fw-bold opacity-75">Mağaza Ağı</div>
+                        <div class="display-6 fw-bold mt-2"><%= magazaSayisi %> <span class="fs-4">Şehir</span></div>
+                        <i class="fa-solid fa-shop kpi-icon"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            
+            <div class="col-lg-6">
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h6 class="fw-bold m-0 text-secondary"><i class="fa-solid fa-chart-line me-2"></i>Aylık Ciro Trendi</h6>
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"><i class="fa-solid fa-palette"></i> TİP</button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" onclick="updateChartType('sales', 'line')">Çizgi</a></li>
+                                <li><a class="dropdown-item" onclick="updateChartType('sales', 'bar')">Sütun</a></li>
+                                <li><a class="dropdown-item" onclick="updateChartType('sales', 'area')">Alan</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="chart-wrapper"><canvas id="salesChart"></canvas></div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h6 class="fw-bold m-0 text-secondary"><i class="fa-solid fa-chart-pie me-2"></i>Kategori Dağılımı</h6>
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"><i class="fa-solid fa-palette"></i> TİP</button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" onclick="updateChartType('category', 'doughnut')">Halka</a></li>
+                                <li><a class="dropdown-item" onclick="updateChartType('category', 'pie')">Pasta</a></li>
+                                <li><a class="dropdown-item" onclick="updateChartType('category', 'bar')">Sütun</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="chart-wrapper"><canvas id="categoryChart"></canvas></div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h6 class="fw-bold m-0 text-success"><i class="fa-solid fa-sack-dollar me-2"></i>Net Kâr Analizi</h6>
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"><i class="fa-solid fa-palette"></i> TİP</button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" onclick="updateChartType('profit', 'bar')">Sütun (Bar)</a></li>
+                                <li><a class="dropdown-item" onclick="updateChartType('profit', 'line')">Çizgi (Line)</a></li>
+                                <li><a class="dropdown-item" onclick="updateChartType('profit', 'pie')">Pasta (Pie)</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="chart-wrapper"><canvas id="profitChart"></canvas></div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h6 class="fw-bold m-0 text-primary"><i class="fa-solid fa-building me-2"></i>Şehirler</h6>
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"><i class="fa-solid fa-palette"></i> TİP</button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" onclick="updateChartType('city', 'horizontalBar')">Yatay Çubuk</a></li>
+                                <li><a class="dropdown-item" onclick="updateChartType('city', 'bar')">Dikey Sütun</a></li>
+                                <li><a class="dropdown-item" onclick="updateChartType('city', 'pie')">Pasta Grafik</a></li>
+                                <li><a class="dropdown-item" onclick="updateChartType('city', 'polarArea')">Kutupsal</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="chart-wrapper"><canvas id="cityChart"></canvas></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+    // 1. GENİŞLETİLMİŞ RENK PALETİ
+    const colorPalette = [
+        '#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b', 
+        '#858796', '#5a5c69', '#6610f2', '#fd7e14', '#20c997',
+        '#FF6633', '#FFB399', '#FF33FF', '#FFFF99', '#00B3E6', 
+        '#E6B333', '#3366E6', '#999966', '#99FF99', '#B34D4D'
+    ];
+
+    // 2. DATA PARSING
+    function safeParse(dataStr) {
+        try {
+            if (!dataStr) return [];
+            if (typeof dataStr === 'object') return dataStr; 
+            return JSON.parse(dataStr); 
+        } catch (e) {
+            console.error("Veri okuma hatası:", e);
+            return [];
+        }
+    }
+
+    // VERİLER
+    const salesData = { labels: safeParse('<%- trendLabels %>'), data: safeParse('<%- trendData %>') };
+    const catData = { labels: safeParse('<%- catLabels %>'), data: safeParse('<%- catData %>') };
+    const profitData = { labels: safeParse('<%- profitLabels %>'), data: safeParse('<%- profitData %>') };
+    const cityData = { labels: safeParse('<%- cityLabels %>'), data: safeParse('<%- cityData %>') };
+
+    // THEME & COLOR MANAGEMENT
+    function getCurrentTheme() { return document.documentElement.getAttribute('data-bs-theme') || 'light'; }
+    function isDarkMode() { return getCurrentTheme() === 'dark'; }
+    
+    function toggleTheme() {
+        const newTheme = getCurrentTheme() === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-bs-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        updateThemeUI(newTheme);
+        updateChartColors(newTheme);
+    }
+    
+    function updateThemeUI(theme) {
+        const themeIcon = document.getElementById('themeIcon');
+        const themeText = document.getElementById('themeText');
+        if (theme === 'dark') {
+            if(themeIcon) themeIcon.className = 'fa-solid fa-moon';
+            if(themeText) themeText.textContent = 'Koyu';
+        } else {
+            if(themeIcon) themeIcon.className = 'fa-solid fa-sun';
+            if(themeText) themeText.textContent = 'Açık';
+        }
+    }
+    
+    function getChartColors(theme) {
+        return theme === 'dark' 
+            ? { textColor: '#e2e8f0', gridColor: 'rgba(255,255,255,0.05)', legendColor: '#e2e8f0' }
+            : { textColor: '#495057', gridColor: 'rgba(0,0,0,0.05)', legendColor: '#495057' };
+    }
+    
+    function updateChartColors(theme) {
+        const colors = getChartColors(theme);
+        [salesChart, categoryChart, profitChart, cityChart].forEach(chart => {
+            if (chart) {
+                if (chart.options.scales) {
+                    Object.keys(chart.options.scales).forEach(key => {
+                        const scale = chart.options.scales[key];
+                        if (scale.display !== false) {
+                            if (scale.grid) scale.grid.color = colors.gridColor;
+                            if (scale.ticks) scale.ticks.color = colors.textColor;
+                        }
+                    });
+                }
+                if (chart.options.plugins?.legend?.labels) {
+                    chart.options.plugins.legend.labels.color = colors.legendColor;
+                }
+                chart.update('none'); 
+            }
+        });
+    }
+    
+    document.addEventListener('DOMContentLoaded', () => { updateThemeUI(getCurrentTheme()); });
+
+    // INSTANCES
+    let salesChart, categoryChart, profitChart, cityChart;
+
+    // TOOLTIP & LEGEND & SCALES
+    const advancedTooltip = {
+        enabled: true,
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        titleFont: { size: 14, weight: 'bold' },
+        bodyFont: { size: 13 },
+        padding: 12,
+        cornerRadius: 8,
+        displayColors: true,
+        callbacks: {
+            label: function(context) {
+                let label = context.dataset.label || '';
+                if (label) label += ': ';
+                let value = context.parsed.y;
+                // Yatay bar kontrolü
+                if (context.chart.config.type === 'bar' && context.chart.options.indexAxis === 'y') {
+                        value = context.parsed.x;
+                } else if (value === undefined || value === null) {
+                        value = context.parsed;
+                }
+                if(value !== null && value !== undefined) {
+                    label += new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY', maximumFractionDigits: 0 }).format(value);
+                }
+                return label;
+            }
+        }
+    };
+
+    function getAdvancedLegend() {
+        const colors = getChartColors(getCurrentTheme());
+        return {
+            display: true, position: 'top',
+            labels: { usePointStyle: true, padding: 15, font: { size: 12, weight: '600' }, color: colors.legendColor }
+        };
+    }
+
+    function getAdvancedScales() {
+        const colors = getChartColors(getCurrentTheme());
+        return {
+            x: {
+                grid: { display: true, color: colors.gridColor, drawBorder: false },
+                ticks: { font: { size: 11, weight: '500' }, color: colors.textColor, padding: 10 }
+            },
+            y: {
+                grid: { display: true, color: colors.gridColor, drawBorder: false },
+                ticks: { 
+                    font: { size: 11, weight: '500' }, color: colors.textColor, padding: 10,
+                    callback: function(value) {
+                        if (typeof value === 'number') {
+                            if (value >= 1000000) return (value / 1000000).toFixed(1) + 'M ₺';
+                            else if (value >= 1000) return (value / 1000).toFixed(0) + 'K ₺';
+                            return value.toLocaleString('tr-TR') + ' ₺';
+                        }
+                        return value; 
+                    }
+                }
+            }
+        };
+    }
+
+    function getCommonOpts() {
+        return { 
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: getAdvancedLegend(), tooltip: advancedTooltip },
+            animation: { duration: 1000, easing: 'easeInOutQuart' }
+        };
+    }
+
+    // ------------------------------------------
+    // 1. SATIŞ
+    // ------------------------------------------
+    function initSales(type = 'line') {
+        const ctx = document.getElementById('salesChart');
+        if (salesChart) salesChart.destroy();
+        let fill = (type === 'area');
+        if(type === 'area') type = 'line';
+
+        salesChart = new Chart(ctx, {
+            type: type,
+            data: {
+                labels: salesData.labels,
+                datasets: [{ 
+                    label: 'Ciro (₺)', data: salesData.data, 
+                    borderColor: '#4e73df', backgroundColor: type === 'bar' ? 'rgba(78, 115, 223, 0.8)' : 'rgba(78, 115, 223, 0.1)', 
+                    fill: fill, tension: 0.4, borderWidth: 3, pointRadius: 4, pointBackgroundColor: '#4e73df'
+                }]
+            },
+            options: { ...getCommonOpts(), scales: getAdvancedScales() }
+        });
+    }
+
+    // ------------------------------------------
+    // 2. KATEGORİ
+    // ------------------------------------------
+    function initCategory(type = 'doughnut') {
+        const ctx = document.getElementById('categoryChart');
+        if (categoryChart) categoryChart.destroy();
+        const isBar = type === 'bar';
+        const opts = getCommonOpts();
+        opts.plugins.legend.display = !isBar;
+        const scales = getAdvancedScales();
+        if (!isBar) { scales.x.display = false; scales.y.display = false; }
+
+        categoryChart = new Chart(ctx, {
+            type: type,
+            data: {
+                labels: catData.labels,
+                datasets: [{ 
+                    label: 'Kategori Satış', data: catData.data, 
+                    backgroundColor: colorPalette, borderWidth: 2, borderColor: isDarkMode() ? '#2c2c2c' : '#fff'
+                }]
+            },
+            options: { ...opts, scales: scales }
+        });
+    }
+
+    // ------------------------------------------
+    // 3. KÂR
+    // ------------------------------------------
+    function initProfit(type = 'bar') {
+        const ctx = document.getElementById('profitChart');
+        if (profitChart) profitChart.destroy();
+        const isPie = (type === 'pie' || type === 'doughnut');
+        const scales = getAdvancedScales();
+        if (isPie) { scales.x.display = false; scales.y.display = false; }
+        const opts = getCommonOpts();
+        opts.plugins.legend.display = isPie;
+
+        profitChart = new Chart(ctx, {
+            type: type,
+            data: {
+                labels: profitData.labels,
+                datasets: [{ 
+                    label: 'Net Kâr (₺)', data: profitData.data, 
+                    backgroundColor: isPie ? colorPalette : 'rgba(28, 200, 138, 0.8)',
+                    borderColor: '#1cc88a', borderWidth: 2, fill: (type === 'area'), tension: 0.3
+                }]
+            },
+            options: { ...opts, scales: scales }
+        });
+    }
+
+    // ------------------------------------------
+// ------------------------------------------
+    // 4. ŞEHİR (DÜZELTİLDİ: Pasta Modunda Renkler ve Legend)
+    // ------------------------------------------
+    function initCity(type = 'horizontalBar') {
+        const ctx = document.getElementById('cityChart');
+        if (cityChart) cityChart.destroy();
+
+        let indexAxis = 'x';
+        let chartType = type;
+        
+        // Yatay bar ayarlaması
+        if (type === 'horizontalBar') {
+            chartType = 'bar';
+            indexAxis = 'y'; // Şehir isimleri solda
+        }
+
+        // Grafik Pasta mı Çubuk mu kontrolü
+        const isPie = (chartType === 'pie' || chartType === 'doughnut');
+
+        const scales = getAdvancedScales();
+        
+        if (isPie) {
+            // Pasta ise eksenleri ve çizgileri tamamen kapat
+            scales.x.display = false;
+            scales.y.display = false;
+        } else if (indexAxis === 'y') {
+            // Yatay Bar ise Y ekseninde şehir isimlerini göster
+            scales.y.ticks.callback = function(val) { return this.getLabelForValue(val); };
+            scales.y.ticks.autoSkip = false;
+            
+            // X ekseninde para formatı
+            scales.x.ticks.callback = function(value) {
+                if (value >= 1000000) return (value / 1000000).toFixed(1) + 'M ₺';
+                else if (value >= 1000) return (value / 1000).toFixed(0) + 'K ₺';
+                return value;
+            };
+        }
+
+        // Legend Ayarı (Pasta ise Aç, Bar ise Kapat)
+        const opts = getCommonOpts();
+        opts.plugins.legend = isPie ? { display: true, position: 'bottom' } : { display: false };
+
+        cityChart = new Chart(ctx, {
+            type: chartType,
+            data: {
+                labels: cityData.labels, 
+                datasets: [{ 
+                    label: 'Toplam Satış (₺)', 
+                    data: cityData.data, 
+                    // DÜZELTME BURASI: Pasta ise renk paletini kullan, değilse tek renk
+                    backgroundColor: isPie ? colorPalette : '#36b9cc', 
+                    borderColor: isPie ? '#ffffff' : '#2c9faf',
+                    borderWidth: 1, 
+                    barPercentage: 0.7 
+                }]
+            },
+            options: {
+                ...opts,
+                indexAxis: indexAxis,
+                scales: scales
+            }
+        });
+    }
+
+    function updateChartType(chartName, newType) {
+        if (chartName === 'sales') initSales(newType);
+        else if (chartName === 'category') initCategory(newType);
+        else if (chartName === 'profit') initProfit(newType);
+        else if (chartName === 'city') initCity(newType);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        initSales('line');
+        initCategory('doughnut');
+        initProfit('bar');
+        initCity('horizontalBar');
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const simId = urlParams.get('simId');
+        if (simId) {
+            const geoLink = document.querySelector('a[href="/cografi-analiz"]');
+            if (geoLink) {
+                geoLink.href = `/cografi-analiz?simId=${simId}`;
+                geoLink.innerHTML += ' <span class="badge bg-warning text-dark ms-2" style="font-size:10px">SİM</span>';
+            }
+        }
+    });
+</script>
+</body>
+</html>
